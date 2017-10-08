@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "407343656505",
+    "firebase_url": "https://flip-timer.firebaseio.com",
+    "project_id": "flip-timer",
+    "storage_bucket": "flip-timer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407343656505:android:3d799cfea749dc33",
+        "android_client_info": {
+          "package_name": "org.nsdev.apps.fliptimer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "407343656505-vq7v4aor43il0nn1u4lpg4va4eibuoe2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.nsdev.apps.fliptimer",
+            "certificate_hash": "2ad9493f143014515730de235a7c254590954212"
+          }
+        },
+        {
+          "client_id": "407343656505-4m22jglji28roh1sf8gka44atvc3jkfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq7hJ3ake2euitnDlncnGEFnRJZ48BFXg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "407343656505-4m22jglji28roh1sf8gka44atvc3jkfi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
