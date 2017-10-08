@@ -1,14 +1,19 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
-import android.app.TimePickerDialog
 import android.util.Log
+import com.github.ajalt.timberkt.Timber.e
+import com.github.ajalt.timberkt.d
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.BasePresenter
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.UiThreadQueue
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
+import timber.log.Timber
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * A super simple presenter
@@ -17,6 +22,8 @@ import java.util.*
 class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThreadQueue) :
         BasePresenter<Contract.View>(uiThreadQueue), Contract.Presenter {
 
+    private var disposables: CompositeDisposable = CompositeDisposable()
+
     override fun attach(view: Contract.View) {
         super.attach(view)
 
@@ -24,6 +31,11 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
 
         val viewModel = view.getViewModel()
         viewModel.portals = mainRepository.getPortalDao().getAll()
+    }
+
+    override fun detach() {
+        super.detach()
+        disposables.clear()
     }
 
     override fun addPortal(portalName: String, faction: Int) {
@@ -48,7 +60,7 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         }
     }
 
-    override fun removePortal(portal: Portal) : Boolean {
+    override fun removePortal(portal: Portal): Boolean {
         async(CommonPool) {
             mainRepository.getPortalDao().delete(portal)
         }
@@ -80,5 +92,45 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
             portal.flipTime = c.time
             mainRepository.getPortalDao().update(portal)
         }
+    }
+
+    override fun scheduleExpiryTimers(portals: List<Portal>) {
+
+        disposables.clear()
+
+        // Peel the portals into a stream of portals filtered by expiry time. Then
+        // for each of those, delay until the expiry. Effectively, this calls back the
+        // subscriber when each of the unexpired portals actually expires.
+        disposables.add(Observable.just(portals)
+                .flatMapIterable { p -> p }
+                .filter { portal -> expiryTime(portal).after(Date()) }
+                .concatMap { portal -> Observable.just(portal).delay(secondsUntilExpiry(portal, Date()), TimeUnit.SECONDS) }
+                .subscribe(
+                        { portal -> expire(portal) },
+                        { error -> Timber.e(error) },
+                        { allExpired() }))
+    }
+
+    private fun expire(portal: Portal) {
+        // Force update the view
+        uiThreadQueue.run(Runnable {
+            view?.refreshPortalList()
+        })
+    }
+
+    private fun allExpired() {
+    }
+
+    private fun expiryTime(portal: Portal) : Date {
+        val c = Calendar.getInstance()
+        c.time = portal.flipTime
+        c.add(Calendar.HOUR_OF_DAY, 1)
+        return c.time
+    }
+
+    private fun secondsUntilExpiry(portal: Portal, now: Date): Long {
+        val secondsUntilExpiry = (expiryTime(portal).time - now.time) / 1000
+        // Round up a bit to make sure expiry has happened
+        return secondsUntilExpiry + 1
     }
 }

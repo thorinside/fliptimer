@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.widget.TimePicker
 import android.widget.Toast
+import com.github.ajalt.timberkt.Timber
 import com.robotsandpencils.kotlindaggerexperiement.R
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.xwray.groupie.GroupAdapter
@@ -70,7 +71,9 @@ class MainActivity : AppCompatActivity(), Contract.View {
         groupAdapter.add(updatingGroup)
 
         getViewModel().portals.observe(this, Observer { portals ->
+            Timber.w { "Portals Changed: ${Thread.currentThread().name}" }
             updatingGroup.update(getPortalItems(portals))
+            portals?.let { presenter.scheduleExpiryTimers(it) }
         })
 
         groupAdapter.apply {
@@ -78,6 +81,11 @@ class MainActivity : AppCompatActivity(), Contract.View {
                 presenter.removePortal((item as PortalItem).portal)
             }
         }
+    }
+
+    override fun refreshPortalList() {
+        Timber.w { "Refresh Portal List: ${Thread.currentThread().name}" }
+        groupAdapter.notifyDataSetChanged()
     }
 
     override fun showError(message: String?) {

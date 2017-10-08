@@ -2,7 +2,6 @@ package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
 import android.support.annotation.StringRes
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
-import java.util.*
 
 /**
  * Main Contract
@@ -14,10 +13,11 @@ interface Contract {
      */
     interface Presenter : com.robotsandpencils.kotlindaggerexperiement.presentation.base.Presenter<View> {
         fun addPortal(portalName: String, faction: Int)
-        fun removePortal(portal: Portal) : Boolean
+        fun removePortal(portal: Portal): Boolean
         fun flipPortal(portal: Portal)
         fun editPortalTime(portal: Portal)
         fun setFlipTime(portal: Portal, hourOfDay: Int, minute: Int)
+        fun scheduleExpiryTimers(portals: List<Portal>)
     }
 
     /**
@@ -30,5 +30,6 @@ interface Contract {
         fun clearFields()
         fun showError(message: String?)
         fun showTimePickerDialog(portal: Portal)
+        fun refreshPortalList()
     }
 }
