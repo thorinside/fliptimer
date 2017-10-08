@@ -1,10 +1,10 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
-import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.LiveData
-import com.robotsandpencils.kotlindaggerexperiement.app.db.User
+import android.arch.lifecycle.ViewModel
+import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 
 
 class MainViewModel : ViewModel() {
-    lateinit var users: LiveData<List<User>>
+    lateinit var portals: LiveData<List<Portal>>
 }

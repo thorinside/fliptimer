@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/FlipTimer.iml" filepath="$PROJECT_DIR$/FlipTimer.iml" />
       <module fileurl="file://$PROJECT_DIR$/KotlinExperiment.iml" filepath="$PROJECT_DIR$/KotlinExperiment.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

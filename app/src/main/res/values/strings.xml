@@ -1,12 +1,7 @@
 <resources>
-    <string name="app_name">KotlinDaggerExperiement</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="id">Id</string>
-    <string name="firstname">Firstname</string>
-    <string name="lastname">Lastname</string>
+    <string name="app_name">Flip Timer</string>
     <string name="add">Add</string>
-    <string name="comic">Comic</string>
-    <string name="previous_comic">Previous Comic</string>
+    <string name="portal_name">Portal Name</string>
+    <string name="flip_button_text">Flip</string>
+    <string name="ready">READY</string>
 </resources>

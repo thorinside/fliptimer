@@ -1,13 +1,14 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
+import android.app.TimePickerDialog
 import android.util.Log
-import com.robotsandpencils.kotlindaggerexperiement.R
-import com.robotsandpencils.kotlindaggerexperiement.app.db.User
+import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.BasePresenter
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.UiThreadQueue
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
+import java.util.*
 
 /**
  * A super simple presenter
@@ -19,19 +20,18 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
     override fun attach(view: Contract.View) {
         super.attach(view)
 
-        view.setTitle("Presenter Attached")
+        view.setTitle("")
 
         val viewModel = view.getViewModel()
-        viewModel.users = mainRepository.getUserDao().getAll()
+        viewModel.portals = mainRepository.getPortalDao().getAll()
     }
 
-    override fun addUser(id: String, firstName: String, lastName: String) {
+    override fun addPortal(portalName: String, faction: Int) {
         // Use Coroutines to rn this in the background and then do something on the UI
         // thread if successful.
         val deferred = async(CommonPool) {
-            mainRepository.getUserDao().insertAll(User(id.toInt(), firstName, lastName))
+            mainRepository.getPortalDao().insert(Portal(portalName, Date(), faction))
             uiThreadQueue.run(Runnable {
-                view?.setTitle("Record Added")
                 view?.clearFields()
             })
         }
@@ -48,40 +48,37 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         }
     }
 
-    override fun removeUser(user: User) {
+    override fun removePortal(portal: Portal) : Boolean {
         async(CommonPool) {
-            mainRepository.getUserDao().delete(user)
+            mainRepository.getPortalDao().delete(portal)
+        }
+        return true
+    }
 
-            uiThreadQueue.run(Runnable {
-                view?.setTitle("Record Deleted")
-            })
+    override fun flipPortal(portal: Portal) {
+        async(CommonPool) {
+            portal.flipTime = Date()
+            if (portal.faction == Portal.FACTION_ENLIGHTENED) {
+                portal.faction = Portal.FACTION_RESISTANCE
+            } else {
+                portal.faction = Portal.FACTION_ENLIGHTENED
+            }
+            mainRepository.getPortalDao().update(portal)
         }
     }
 
-    override fun navigate(id: Int): Boolean {
-        when (id) {
-            R.id.navigation_home -> {
-                view?.setTitle(R.string.title_home)
-                view?.showHome()
-                view?.hideDashboard()
-                view?.hideNotifications()
-                return true
-            }
-            R.id.navigation_dashboard -> {
-                view?.setTitle(R.string.title_dashboard)
-                view?.hideHome()
-                view?.showDashboard()
-                view?.hideNotifications()
-                return true
-            }
-            R.id.navigation_notifications -> {
-                view?.setTitle(R.string.title_notifications)
-                view?.hideHome()
-                view?.hideDashboard()
-                view?.showNotifications()
-                return true
-            }
+    override fun editPortalTime(portal: Portal) {
+        view?.showTimePickerDialog(portal)
+    }
+
+    override fun setFlipTime(portal: Portal, hourOfDay: Int, minute: Int) {
+        val c = Calendar.getInstance()
+        c.time = Date()
+        c.set(Calendar.HOUR_OF_DAY, hourOfDay)
+        c.set(Calendar.MINUTE, minute)
+        async(CommonPool) {
+            portal.flipTime = c.time
+            mainRepository.getPortalDao().update(portal)
         }
-        return false
     }
 }

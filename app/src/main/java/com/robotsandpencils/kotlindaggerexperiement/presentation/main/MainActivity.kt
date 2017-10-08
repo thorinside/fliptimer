@@ -1,41 +1,31 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
+import android.app.TimePickerDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
-import android.view.View
+import android.widget.TimePicker
 import android.widget.Toast
 import com.robotsandpencils.kotlindaggerexperiement.R
-import com.robotsandpencils.kotlindaggerexperiement.app.db.User
+import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.UpdatingGroup
 import com.xwray.groupie.ViewHolder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity(), Contract.View {
 
-    companion object {
-        val CURRENT_TAB_ITEM: String = "CurrentTabItem"
-    }
-
     @Inject lateinit var presenter: Contract.Presenter
 
     private val groupAdapter = GroupAdapter<ViewHolder>()
     private val updatingGroup = UpdatingGroup()
-    private var currentTabItem: Int = R.id.navigation_home
-
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        currentTabItem = item.itemId
-        return@OnNavigationItemSelectedListener presenter.navigate(item.itemId)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -46,23 +36,7 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
         presenter.attach(this)
 
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-
-        if (savedInstanceState != null) {
-            currentTabItem = savedInstanceState.getInt(CURRENT_TAB_ITEM)
-            navigation.selectedItemId = currentTabItem
-        } else {
-            showHome()
-            hideDashboard()
-            hideNotifications()
-        }
-
         connectView()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-        outState?.putInt(CURRENT_TAB_ITEM, currentTabItem)
     }
 
     private fun connectView() {
@@ -72,11 +46,21 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
     private fun connectButton() {
         button.setOnClickListener { _ ->
-            Log.d("Button", "${idNumber.text} ${firstName.text} ${lastName.text}")
-
             // Tell the presenter to perform the database insert
-            presenter.addUser(idNumber.text.toString(), firstName.text.toString(), lastName.text.toString())
+            presenter.addPortal(portalName.text.toString(), Portal.FACTION_RESISTANCE)
         }
+    }
+
+    override fun showTimePickerDialog(portal: Portal) {
+        val c = Calendar.getInstance()
+        c.time = portal.flipTime
+
+        TimePickerDialog(this,
+                { timePicker : TimePicker, hourOfDay: Int, minute: Int ->
+                    presenter.setFlipTime(portal, hourOfDay, minute)
+                },
+                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true)
+                .show()
     }
 
     private fun connectRecyclerView() {
@@ -85,15 +69,13 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
         groupAdapter.add(updatingGroup)
 
-        getViewModel().users.observe(this, Observer { users ->
-            Log.d("USERS", "Got some users: $users thread =  ${Thread.currentThread().name}")
-
-            updatingGroup.update(getUserItems(users))
+        getViewModel().portals.observe(this, Observer { portals ->
+            updatingGroup.update(getPortalItems(portals))
         })
 
         groupAdapter.apply {
-            setOnItemClickListener { item, _ ->
-                presenter.removeUser((item as UserItem).user)
+            setOnItemLongClickListener { item, _ ->
+                presenter.removePortal((item as PortalItem).portal)
             }
         }
     }
@@ -102,19 +84,19 @@ class MainActivity : AppCompatActivity(), Contract.View {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    private fun getUserItems(users: List<User>?): List<Item<ViewHolder>> {
-        val items = ArrayList<UserItem>()
+    private fun getPortalItems(portals: List<Portal>?): List<Item<ViewHolder>> {
+        val items = ArrayList<PortalItem>()
 
-        users?.forEach { user ->
-            items.add(UserItem(user))
+        portals?.forEach { portal ->
+            items.add(PortalItem(portal, presenter))
         }
 
         return items
     }
 
     override fun clearFields() {
-        idNumber.requestFocus()
-        arrayOf(idNumber.text, firstName.text, lastName.text)
+        portalName.requestFocus()
+        arrayOf(portalName.text)
                 .forEach { it.clear() }
     }
 
@@ -133,29 +115,5 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
     override fun getViewModel(): MainViewModel {
         return ViewModelProviders.of(this).get(MainViewModel::class.java)
-    }
-
-    override fun showHome() {
-        homeLayout.visibility = View.VISIBLE
-    }
-
-    override fun showDashboard() {
-        dashboardLayout.visibility = View.VISIBLE
-    }
-
-    override fun showNotifications() {
-        notificationsLayout.visibility = View.VISIBLE
-    }
-
-    override fun hideHome() {
-        homeLayout.visibility = View.GONE
-    }
-
-    override fun hideDashboard() {
-        dashboardLayout.visibility = View.GONE
-    }
-
-    override fun hideNotifications() {
-        notificationsLayout.visibility = View.GONE
     }
 }
