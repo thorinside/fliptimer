@@ -2,6 +2,7 @@ package com.robotsandpencils.kotlindaggerexperiement
 
 import android.app.Activity
 import android.app.Application
+import android.support.multidex.MultiDexApplication
 import android.support.v4.app.Fragment
 import com.robotsandpencils.kotlindaggerexperiement.app.modules.AppComponent
 import com.robotsandpencils.kotlindaggerexperiement.app.modules.AppModule
@@ -17,7 +18,7 @@ import javax.inject.Inject
  * App
  */
 
-class App : Application(), HasActivityInjector, HasSupportFragmentInjector {
+class App : MultiDexApplication(), HasActivityInjector, HasSupportFragmentInjector {
     @Inject
     internal lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
 
