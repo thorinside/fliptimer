@@ -1,5 +1,6 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main.module
 
+import android.app.AlarmManager
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.LifecycleAwareUiThreadQueue
 import com.robotsandpencils.kotlindaggerexperiement.presentation.main.Contract
@@ -16,8 +17,8 @@ internal abstract class PresenterModule {
     companion object {
         @Provides
         @Scope
-        @JvmStatic internal fun providesPresenter(activity: MainActivity, mainRepository: MainRepository): Contract.Presenter {
-            return Presenter(mainRepository, LifecycleAwareUiThreadQueue(activity))
+        @JvmStatic internal fun providesPresenter(activity: MainActivity, mainRepository: MainRepository, alarmManager: AlarmManager): Contract.Presenter {
+            return Presenter(mainRepository, LifecycleAwareUiThreadQueue(activity), alarmManager)
         }
     }
 }

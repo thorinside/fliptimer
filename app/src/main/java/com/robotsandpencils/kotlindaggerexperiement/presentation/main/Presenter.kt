@@ -1,10 +1,13 @@
 package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.job.JobInfo
+import android.content.Intent
 import android.util.Log
-import com.github.ajalt.timberkt.Timber.e
-import com.github.ajalt.timberkt.d
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
+import com.robotsandpencils.kotlindaggerexperiement.app.services.NotificationPublisher
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.BasePresenter
 import com.robotsandpencils.kotlindaggerexperiement.presentation.base.UiThreadQueue
 import io.reactivex.Observable
@@ -19,7 +22,7 @@ import java.util.concurrent.TimeUnit
  * A super simple presenter
  */
 
-class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThreadQueue) :
+class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThreadQueue, val alarmManager: AlarmManager) :
         BasePresenter<Contract.View>(uiThreadQueue), Contract.Presenter {
 
     private var disposables: CompositeDisposable = CompositeDisposable()
@@ -96,6 +99,22 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
 
     override fun scheduleExpiryTimers(portals: List<Portal>) {
 
+        // Schedule expiry jobs with the JobScheduler
+        Observable.just(portals)
+                .flatMapIterable { p -> p }
+                .filter { portal -> expiryTime(portal).after(Date()) }
+                .subscribe({
+                    portal ->
+                        val intent = Intent(mainRepository.app, NotificationPublisher::class.java)
+                        intent.putExtra("PORTAL_NAME", portal.portalName)
+                        val pendingIntent = PendingIntent.getBroadcast(mainRepository.app, portal.portalName.hashCode(), intent, PendingIntent.FLAG_ONE_SHOT)
+                        alarmManager.setExact(AlarmManager.RTC,
+                                System.currentTimeMillis() + secondsUntilExpiry(portal, Date()) * 1000,
+                                pendingIntent)
+                })
+
+
+
         disposables.clear()
 
         // Peel the portals into a stream of portals filtered by expiry time. Then
@@ -121,7 +140,7 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
     private fun allExpired() {
     }
 
-    private fun expiryTime(portal: Portal) : Date {
+    private fun expiryTime(portal: Portal): Date {
         val c = Calendar.getInstance()
         c.time = portal.flipTime
         c.add(Calendar.HOUR_OF_DAY, 1)

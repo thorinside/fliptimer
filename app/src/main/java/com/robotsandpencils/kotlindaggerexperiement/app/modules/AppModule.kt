@@ -1,6 +1,9 @@
 package com.robotsandpencils.kotlindaggerexperiement.app.modules
 
+import android.app.AlarmManager
+import android.app.job.JobScheduler
 import android.arch.persistence.room.Room
+import android.content.Context
 import com.robotsandpencils.kotlindaggerexperiement.App
 import com.robotsandpencils.kotlindaggerexperiement.app.db.AppDatabase
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
@@ -27,4 +30,8 @@ class AppModule(val app: App) {
     @Provides
     @Singleton
     fun provideMainRepository(database: AppDatabase) = MainRepository(app, database)
+
+    @Provides
+    @Singleton
+    fun provideAlarmManager(app: App) = app.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 }
