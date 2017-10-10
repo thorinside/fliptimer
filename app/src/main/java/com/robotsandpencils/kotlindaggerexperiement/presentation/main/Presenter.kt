@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * A super simple presenter
  */
 
-class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThreadQueue, val alarmManager: AlarmManager) :
+class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThreadQueue, private val alarmManager: AlarmManager) :
         BasePresenter<Contract.View>(uiThreadQueue), Contract.Presenter {
 
     private var disposables: CompositeDisposable = CompositeDisposable()
