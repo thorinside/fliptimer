@@ -90,6 +90,9 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         c.time = Date()
         c.set(Calendar.HOUR_OF_DAY, hourOfDay)
         c.set(Calendar.MINUTE, minute)
+        c.set(Calendar.SECOND, 0)
+        c.set(Calendar.MILLISECOND, 0)
+
         async(CommonPool) {
             portal.flipTime = c.time
             mainRepository.getPortalDao().update(portal)
@@ -107,7 +110,7 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
                     intent.putExtra("PORTAL_NAME", portal.portalName)
                     val pendingIntent = PendingIntent.getBroadcast(mainRepository.app, portal.portalName.hashCode(), intent, PendingIntent.FLAG_ONE_SHOT)
                     alarmManager.setExact(AlarmManager.RTC,
-                            System.currentTimeMillis() + secondsUntilExpiry(portal, Date()) * 1000,
+                            System.currentTimeMillis() + millisecondsUntilExpiry(portal, Date()),
                             pendingIntent)
                 })
 
@@ -119,13 +122,14 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         disposables.add(Observable.just(portals)
                 .flatMapIterable { p -> p }
                 .filter { portal -> expiryTime(portal).after(Date()) }
-                .concatMap { portal -> Observable.just(portal).delay(secondsUntilExpiry(portal, Date()), TimeUnit.SECONDS) }
+                .concatMap { portal -> Observable.just(portal).delay(millisecondsUntilExpiry(portal, Date()), TimeUnit.MILLISECONDS) }
                 .subscribe(
                         { portal -> expire(portal) },
                         { error -> Timber.e(error) },
                         { allExpired() }))
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun expire(portal: Portal) {
         // Force update the view
         uiThreadQueue.run(Runnable {
@@ -143,9 +147,9 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         return c.time
     }
 
-    private fun secondsUntilExpiry(portal: Portal, now: Date): Long {
-        val secondsUntilExpiry = (expiryTime(portal).time - now.time) / 1000
+    private fun millisecondsUntilExpiry(portal: Portal, now: Date): Long {
+        val millisecondsUntilExpiry = (expiryTime(portal).time - now.time)
         // Round up a bit to make sure expiry has happened
-        return secondsUntilExpiry + 1
+        return millisecondsUntilExpiry + 1000
     }
 }
