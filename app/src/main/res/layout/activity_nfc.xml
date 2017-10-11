@@ -16,4 +16,5 @@
         android:text="Tap your phones together like you just don't care."
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

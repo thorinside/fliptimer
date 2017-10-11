@@ -10,4 +10,5 @@
     <string name="delete_portal_delete">Delete</string>
     <string name="delete_portal_cancel">Cancel</string>
     <string name="unpair">Unpair</string>
+    <string name="pair">Pair</string>
 </resources>

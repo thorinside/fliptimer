@@ -10,8 +10,12 @@
 
     <item
         android:id="@+id/action_unpair"
-        android:icon="@drawable/ic_unpair_white_24dp"
         android:title="@string/unpair"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_pair"
+        android:title="@string/pair"
         app:showAsAction="never"/>
 
 </menu>

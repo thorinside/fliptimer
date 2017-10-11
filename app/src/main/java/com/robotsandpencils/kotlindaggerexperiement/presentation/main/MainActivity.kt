@@ -14,7 +14,6 @@ import android.view.MenuItem
 import android.widget.TimePicker
 import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
-import com.github.ajalt.timberkt.Timber
 import com.robotsandpencils.kotlindaggerexperiement.R
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
 import com.robotsandpencils.kotlindaggerexperiement.presentation.nfc.NfcActivity
@@ -24,12 +23,12 @@ import com.xwray.groupie.UpdatingGroup
 import com.xwray.groupie.ViewHolder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), Contract.View {
-
+class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> {
     @Inject lateinit var presenter: Contract.Presenter
 
     private val groupAdapter = GroupAdapter<ViewHolder>()
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity(), Contract.View {
         c.time = portal.flipTime
 
         TimePickerDialog(this,
-                { timePicker : TimePicker, hourOfDay: Int, minute: Int ->
+                { timePicker: TimePicker, hourOfDay: Int, minute: Int ->
                     presenter.setFlipTime(portal, hourOfDay, minute)
                 },
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true)
@@ -77,11 +76,7 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
         groupAdapter.add(updatingGroup)
 
-        getViewModel().portals.observe(this, Observer { portals ->
-            Timber.w { "Portals Changed: ${Thread.currentThread().name}" }
-            updatingGroup.update(getPortalItems(portals))
-            portals?.let { presenter.scheduleExpiryTimers(it) }
-        })
+        getViewModel().portals.observe(this, this)
 
         val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
@@ -112,7 +107,7 @@ class MainActivity : AppCompatActivity(), Contract.View {
     }
 
     override fun refreshPortalList() {
-        Timber.w { "Refresh Portal List: ${Thread.currentThread().name}" }
+        Timber.w("Refresh Portal List: ${Thread.currentThread().name}")
         groupAdapter.notifyDataSetChanged()
     }
 
@@ -149,9 +144,8 @@ class MainActivity : AppCompatActivity(), Contract.View {
         message.text = getString(text)
     }
 
-    override fun getViewModel(): MainViewModel {
-        return ViewModelProviders.of(this).get(MainViewModel::class.java)
-    }
+    override fun getViewModel(): MainViewModel =
+            ViewModelProviders.of(this).get(MainViewModel::class.java)
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main, menu)
@@ -163,12 +157,25 @@ class MainActivity : AppCompatActivity(), Contract.View {
         when (item?.itemId) {
             R.id.action_nfc -> {
                 startActivity(Intent(this@MainActivity, NfcActivity::class.java))
+                return true
             }
             R.id.action_unpair -> {
                 presenter.unpair()
+                return true
+            }
+            R.id.action_pair -> {
+                presenter.pair("e9140e8d-85f2-4f38-984b-a4601a084384-bf831646-8d2f-46c3-8594-57cf85c8a96a")
+                return true
             }
         }
 
         return super.onOptionsItemSelected(item)
     }
+
+    override fun onChanged(portals: List<Portal>?) {
+        Timber.w("Portals Changed: ${Thread.currentThread().name}")
+        updatingGroup.update(getPortalItems(portals))
+        portals?.let { presenter.scheduleExpiryTimers(it) }
+    }
+
 }

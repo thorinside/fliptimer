@@ -46,6 +46,8 @@ class FirebasePortalDao(sharedDatabaseKey: String) : PortalDao {
                         portals.add(portal)
                     }
 
+                    Timber.d("Portals: ${Thread.currentThread().name} $portals")
+
                     all.value = portals
                 }
     }

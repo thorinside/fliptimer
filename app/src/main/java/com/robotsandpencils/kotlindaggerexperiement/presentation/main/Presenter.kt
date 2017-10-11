@@ -71,6 +71,10 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         mainRepository.unpair()
     }
 
+    override fun pair(sharingKey: String) {
+        mainRepository.pair(sharingKey)
+    }
+
     override fun removePortal(portal: Portal): Boolean {
         async(CommonPool) {
             mainRepository.portalDao.delete(portal)
