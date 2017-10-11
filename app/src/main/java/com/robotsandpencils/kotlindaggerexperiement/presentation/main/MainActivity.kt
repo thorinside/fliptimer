@@ -7,10 +7,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TimePicker
 import android.widget.Toast
+import com.afollestad.materialdialogs.MaterialDialog
 import com.github.ajalt.timberkt.Timber
 import com.robotsandpencils.kotlindaggerexperiement.R
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
@@ -80,11 +83,32 @@ class MainActivity : AppCompatActivity(), Contract.View {
             portals?.let { presenter.scheduleExpiryTimers(it) }
         })
 
-        groupAdapter.apply {
-            setOnItemLongClickListener { item, _ ->
-                presenter.removePortal((item as PortalItem).portal)
+        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
+                    false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val item = groupAdapter.getItem(position)
+                val portal = (item as PortalItem).portal
+
+                MaterialDialog.Builder(this@MainActivity)
+                        .title(getString(R.string.delete_portal_title))
+                        .content("Do you want to delete the portal named ${portal.portalName}?")
+                        .positiveText(getString(R.string.delete_portal_delete))
+                        .negativeText(getString(R.string.delete_portal_cancel))
+                        .onPositive { _, _ ->
+                            presenter.removePortal(portal)
+                        }
+                        .onNegative { _, _ ->
+                            groupAdapter.notifyItemRangeChanged(position, groupAdapter.itemCount)
+                        }
+                        .show()
             }
         }
+
+        val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
+        itemTouchHelper.attachToRecyclerView(list)
     }
 
     override fun refreshPortalList() {
@@ -138,8 +162,10 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
         when (item?.itemId) {
             R.id.action_nfc -> {
-                Timber.d { "NFC" }
                 startActivity(Intent(this@MainActivity, NfcActivity::class.java))
+            }
+            R.id.action_unpair -> {
+                presenter.unpair()
             }
         }
 

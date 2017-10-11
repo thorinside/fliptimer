@@ -32,7 +32,7 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         view.setTitle("")
 
         val viewModel = view.getViewModel()
-        viewModel.portals = mainRepository.getPortalDao().getAll()
+        viewModel.portals = mainRepository.portalDao.getAll()
     }
 
     override fun detach() {
@@ -41,10 +41,15 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
     }
 
     override fun addPortal(portalName: String, faction: Int) {
+
+        if (portalName.isEmpty()) {
+            return
+        }
+
         // Use Coroutines to rn this in the background and then do something on the UI
         // thread if successful.
         val deferred = async(CommonPool) {
-            mainRepository.getPortalDao().insert(Portal(portalName, Date(), faction))
+            mainRepository.portalDao.insert(Portal(portalName, Date(), faction))
             uiThreadQueue.run(Runnable {
                 view?.clearFields()
             })
@@ -62,9 +67,13 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
         }
     }
 
+    override fun unpair() {
+        mainRepository.unpair()
+    }
+
     override fun removePortal(portal: Portal): Boolean {
         async(CommonPool) {
-            mainRepository.getPortalDao().delete(portal)
+            mainRepository.portalDao.delete(portal)
         }
         return true
     }
@@ -77,7 +86,7 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
             } else {
                 portal.faction = Portal.FACTION_ENLIGHTENED
             }
-            mainRepository.getPortalDao().update(portal)
+            mainRepository.portalDao.update(portal)
         }
     }
 
@@ -95,14 +104,11 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
 
         async(CommonPool) {
             portal.flipTime = c.time
-            mainRepository.getPortalDao().update(portal)
+            mainRepository.portalDao.update(portal)
         }
     }
 
     override fun scheduleExpiryTimers(portals: List<Portal>) {
-
-        // Save the portals to remote server
-        mainRepository.savePortalsToRemote()
 
         // Schedule expiry broadcasts with the AlarmManager
         Observable.just(portals)

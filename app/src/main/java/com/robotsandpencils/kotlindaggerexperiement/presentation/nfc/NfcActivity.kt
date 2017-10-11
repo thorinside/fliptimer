@@ -8,7 +8,9 @@ import android.nfc.NfcEvent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.google.gson.Gson
 import com.robotsandpencils.kotlindaggerexperiement.R
+import com.robotsandpencils.kotlindaggerexperiement.app.model.SharingInfo
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_nfc.*
 import javax.inject.Inject
@@ -73,6 +75,9 @@ class NfcActivity : AppCompatActivity(), Contract.View, NfcAdapter.CreateNdefMes
         // only one message sent during the beam
         val msg = rawMsgs[0] as NdefMessage
         // record 0 contains the MIME type, record 1 is the AAR, if present
-        message.text = String(msg.records[0].payload)
+        val json = String(msg.records[0].payload)
+        message.text = json
+        val info = Gson().fromJson(json, SharingInfo::class.java)
+        presenter.pair(info.sharingKey)
     }
 }

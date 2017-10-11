@@ -11,4 +11,8 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
     override fun generateShareJson(): String {
         return Gson().toJson(mainRepository.getSharingInfo())
     }
+
+    override fun pair(pairingKey: String) {
+        mainRepository.pair(pairingKey)
+    }
 }

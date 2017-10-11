@@ -1,15 +1,11 @@
 package com.robotsandpencils.kotlindaggerexperiement.app.repositories
 
 import android.content.Context
-import com.google.firebase.firestore.FirebaseFirestore
 import com.robotsandpencils.kotlindaggerexperiement.App
 import com.robotsandpencils.kotlindaggerexperiement.app.db.AppDatabase
-import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
+import com.robotsandpencils.kotlindaggerexperiement.app.db.FirebasePortalDao
 import com.robotsandpencils.kotlindaggerexperiement.app.db.PortalDao
 import com.robotsandpencils.kotlindaggerexperiement.app.model.SharingInfo
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.async
-import timber.log.Timber
 import java.util.*
 
 
@@ -18,63 +14,44 @@ import java.util.*
  */
 
 class MainRepository(val app: App, private val database: AppDatabase) {
-    fun getPortalDao(): PortalDao {
-        return database.portalDao()
-    }
+
+    val portalDao: PortalDao
+        get() = FirebasePortalDao(sharingKey)
 
     fun getSharingInfo(): SharingInfo {
-        val key = getSharingKey()
+        val key = sharingKey
 
         return SharingInfo(key)
     }
 
-    private fun getSharingKey(): String {
-        val sharedPref = app.getSharedPreferences("main_preferences", Context.MODE_PRIVATE)
-        val key = sharedPref.getString("sharingKey", UUID.randomUUID().toString() + "-"
-                + UUID.randomUUID())
+    private val sharingKey: String
+        get() {
+            val sharedPref = app.getSharedPreferences("main_preferences", Context.MODE_PRIVATE)
+            if (sharedPref.contains("pairedKey")) {
+                val key = sharedPref.getString("pairedKey", null)
+                if (key != null) {
+                    return key
+                }
+            }
+            val key = sharedPref.getString("sharingKey", UUID.randomUUID().toString() + "-"
+                    + UUID.randomUUID())
 
-        // Save the sharing key as the default
-        sharedPref.edit().putString("sharingKey", key).apply()
-        return key
+            // Save the sharing key as the default
+            sharedPref.edit().putString("sharingKey", key).apply()
+            return key
+        }
+
+    fun pair(pairingKey: String) {
+        val sharedPref = app.getSharedPreferences("main_preferences", Context.MODE_PRIVATE)
+        sharedPref.edit().putString("pairedKey", pairingKey).apply()
+
+        (portalDao as FirebasePortalDao).sharedDatabaseKey = sharingKey
     }
 
-    fun savePortalsToRemote() {
+    fun unpair() {
+        val sharedPref = app.getSharedPreferences("main_preferences", Context.MODE_PRIVATE)
+        sharedPref.edit().remove("pairedKey").apply()
 
-        async(CommonPool) {
-
-            val key = getSharingKey()
-            val portals = database.portalDao().getAllSync()
-            val db = FirebaseFirestore.getInstance()
-
-            portals.forEach { portal: Portal ->
-
-                val portalDocument = HashMap<String, Any>()
-                portalDocument.put("portalName", portal.portalName)
-                portalDocument.put("faction", portal.faction)
-                portalDocument.put("flipTime", portal.flipTime.time)
-
-                db.collection("shared")
-                        .document(key)
-                        .collection("portals")
-                        .document(portal.portalName)
-                        .set(portalDocument)
-                        .addOnFailureListener { exception ->
-                            Timber.e(exception, "Didn't work.")
-                        }
-            }
-            /*
-        db.collection("shared")
-                .add(shareDocument)
-                .addOnSuccessListener { doc ->
-
-                    val portals = database.portalDao().getAll().value
-
-                    portals?.forEach {
-                        doc.collection("portals")
-                                .add(it)
-                    }
-                }
-                */
-        }
+        (portalDao as FirebasePortalDao).sharedDatabaseKey = sharingKey
     }
 }

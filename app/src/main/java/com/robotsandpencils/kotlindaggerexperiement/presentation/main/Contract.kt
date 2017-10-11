@@ -18,6 +18,7 @@ interface Contract {
         fun editPortalTime(portal: Portal)
         fun setFlipTime(portal: Portal, hourOfDay: Int, minute: Int)
         fun scheduleExpiryTimers(portals: List<Portal>)
+        fun unpair()
     }
 
     /**
