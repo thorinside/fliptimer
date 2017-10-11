@@ -10,7 +10,8 @@ import javax.inject.Singleton
  */
 @Singleton
 @Component(modules = arrayOf(AndroidSupportInjectionModule::class, AppModule::class,
-        com.robotsandpencils.kotlindaggerexperiement.presentation.main.module.Module::class))
+        com.robotsandpencils.kotlindaggerexperiement.presentation.main.module.Module::class,
+        com.robotsandpencils.kotlindaggerexperiement.presentation.nfc.module.Module::class))
 interface AppComponent {
     fun inject(app: App)
 }

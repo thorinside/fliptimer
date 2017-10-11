@@ -3,14 +3,18 @@ package com.robotsandpencils.kotlindaggerexperiement.presentation.main
 import android.app.TimePickerDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TimePicker
 import android.widget.Toast
 import com.github.ajalt.timberkt.Timber
 import com.robotsandpencils.kotlindaggerexperiement.R
 import com.robotsandpencils.kotlindaggerexperiement.app.db.Portal
+import com.robotsandpencils.kotlindaggerexperiement.presentation.nfc.NfcActivity
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.UpdatingGroup
@@ -123,5 +127,22 @@ class MainActivity : AppCompatActivity(), Contract.View {
 
     override fun getViewModel(): MainViewModel {
         return ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+
+        when (item?.itemId) {
+            R.id.action_nfc -> {
+                Timber.d { "NFC" }
+                startActivity(Intent(this@MainActivity, NfcActivity::class.java))
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

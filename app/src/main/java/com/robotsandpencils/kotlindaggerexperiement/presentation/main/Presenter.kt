@@ -101,6 +101,9 @@ class Presenter(private val mainRepository: MainRepository, uiThreadQueue: UiThr
 
     override fun scheduleExpiryTimers(portals: List<Portal>) {
 
+        // Save the portals to remote server
+        mainRepository.savePortalsToRemote()
+
         // Schedule expiry broadcasts with the AlarmManager
         Observable.just(portals)
                 .flatMapIterable { p -> p }

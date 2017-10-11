@@ -12,6 +12,9 @@ interface PortalDao {
     @Query("SELECT * FROM portal order by flip_time asc")
     fun getAll(): LiveData<List<Portal>>
 
+    @Query("SELECT * FROM portal order by flip_time asc")
+    fun getAllSync(): List<Portal>
+
     @Insert
     fun insert(portal: Portal)
 
