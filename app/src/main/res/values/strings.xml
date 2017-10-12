@@ -4,7 +4,7 @@
     <string name="portal_name">Portal Name</string>
     <string name="flip_button_text">Flip</string>
     <string name="ready">READY</string>
-    <string name="share_with_nfc">Share with NFC</string>
+    <string name="pair_with_nfc">Pair with NFC</string>
     <string name="nfc_activity_title">NFC Pairing</string>
     <string name="delete_portal_title">Are you sure?</string>
     <string name="delete_portal_delete">Delete</string>
