@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> 
     private fun connectButton() {
         button.setOnClickListener { _ ->
             // Tell the presenter to perform the database insert
-            presenter.addPortal(portalName.text.toString(), Portal.FACTION_RESISTANCE)
+            presenter.addPortal(portal.text.toString(), Portal.FACTION_RESISTANCE)
         }
     }
 
@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> 
     }
 
     override fun clearFields() {
-        portalName.requestFocus()
-        arrayOf(portalName.text)
+        portal.requestFocus()
+        arrayOf(portal.text)
                 .forEach { it.clear() }
     }
 
