@@ -15,8 +15,7 @@ import java.util.*
 
 class MainRepository(val app: App, private val database: AppDatabase) {
 
-    val portalDao: PortalDao
-        get() = FirebasePortalDao(sharingKey)
+    val portalDao: PortalDao = FirebasePortalDao(sharingKey)
 
     fun getSharingInfo(): SharingInfo {
         val key = sharingKey
