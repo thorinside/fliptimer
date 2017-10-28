@@ -2,7 +2,6 @@ package com.robotsandpencils.kotlindaggerexperiement.app.repositories
 
 import android.content.Context
 import com.robotsandpencils.kotlindaggerexperiement.App
-import com.robotsandpencils.kotlindaggerexperiement.app.db.AppDatabase
 import com.robotsandpencils.kotlindaggerexperiement.app.db.FirebasePortalDao
 import com.robotsandpencils.kotlindaggerexperiement.app.db.PortalDao
 import com.robotsandpencils.kotlindaggerexperiement.app.model.SharingInfo
@@ -13,7 +12,7 @@ import java.util.*
  * Simple, empty main repository.
  */
 
-class MainRepository(val app: App, private val database: AppDatabase) {
+class MainRepository(val app: App) {
 
     val portalDao: PortalDao = FirebasePortalDao(sharingKey)
 

@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> 
         c.time = portal.flipTime
 
         TimePickerDialog(this,
-                { timePicker: TimePicker, hourOfDay: Int, minute: Int ->
+                { _: TimePicker, hourOfDay: Int, minute: Int ->
                     presenter.setFlipTime(portal, hourOfDay, minute)
                 },
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true)

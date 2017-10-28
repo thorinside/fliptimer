@@ -1,11 +1,8 @@
 package com.robotsandpencils.kotlindaggerexperiement.app.modules
 
 import android.app.AlarmManager
-import android.app.job.JobScheduler
-import android.arch.persistence.room.Room
 import android.content.Context
 import com.robotsandpencils.kotlindaggerexperiement.App
-import com.robotsandpencils.kotlindaggerexperiement.app.db.AppDatabase
 import com.robotsandpencils.kotlindaggerexperiement.app.repositories.MainRepository
 import dagger.Module
 import dagger.Provides
@@ -23,13 +20,7 @@ class AppModule(val app: App) {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(app: App): AppDatabase {
-        return Room.databaseBuilder(app, AppDatabase::class.java, "database-name").build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideMainRepository(database: AppDatabase) = MainRepository(app, database)
+    fun provideMainRepository() = MainRepository(app)
 
     @Provides
     @Singleton
