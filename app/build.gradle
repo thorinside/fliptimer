@@ -33,7 +33,6 @@ ext {
     archVersion = "1.0.3"
     archVersionA = "1.0.0-rc1"
     daggerVersion = "2.11"
-    ankoVersion = "0.10.1"
     groupieVersion = "2.0.0-alpha2"
     firebaseVersion = "11.4.2"
 }
@@ -72,11 +71,7 @@ dependencies {
     // Architecture Components
     implementation "android.arch.lifecycle:runtime:$archVersion"
     implementation "android.arch.lifecycle:extensions:$archVersionA"
-    //implementation "android.arch.persistence.room:runtime:$archVersionA"
-    //implementation "android.arch.persistence.room:rxjava2:$archVersionA"
     kapt "android.arch.lifecycle:compiler:$archVersionA"
-    //kapt "android.arch.persistence.room:compiler:$archVersionA"
-    //testImplementation "android.arch.persistence.room:testing:$archVersionA"
 
     // Groupie
     implementation "com.xwray:groupie:$groupieVersion"
