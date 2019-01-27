@@ -39,7 +39,7 @@ class FirebasePortalDao(sharedDatabaseKey: String) : PortalDao {
                         return@addSnapshotListener
                     }
                     val portals = ArrayList<Portal>()
-                    querySnapshot.forEach {
+                    querySnapshot?.forEach {
                         val portal = Portal(it.get("portalName") as String,
                                 Date(it.get("flipTime") as Long),
                                 (it.get("faction") as Long).toInt())

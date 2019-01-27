@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> 
         getViewModel().portals.observe(this, this)
 
         val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
                     false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), Contract.View, Observer<List<Portal>> 
     override fun clearFields() {
         portal.requestFocus()
         arrayOf(portal.text)
-                .forEach { it.clear() }
+                .forEach { it?.clear() }
     }
 
     override fun onDestroy() {
